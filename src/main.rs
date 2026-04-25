@@ -1,28 +1,30 @@
 fn main() {
-    let a = String::from("AAPL");
-    let b = a;
+    let symbol = String::from("AAPL");
+    print_symbol(&symbol);
+    print_symbol(&symbol);
+    println!("Still own it: {}", symbol);
 
-    // print!("{}", a);
-    println!("b owns: {}", b);
+    let mut quantity: f64 = 10.0;
+    add_shares(&mut quantity, 5.0);
+    add_shares(&mut quantity, 2.5);
+    println!("Final quantity: {}", quantity);
 
-    let x = 42;
-    let y = x;
-    println!("x: {}, y: {}", x, y);
+    let mut price = 100.0;
+    let r1 = &price;
+    let r2 = &price;
+    println!("Two readers: {}, {}", r1, r2);
 
-    let symbol = String::from("GOOGL");
-    consume_symbol(symbol);
-    // println!("symbol: {}", symbol);
-
-    let s1 = String::from("MSFT");
-    let s1 = take_and_give_back(s1);
-    println!("Got back: {}", s1);
+    println!("{}", r1);
+    let r3 = &mut price;
+    
+    *r3 += 5.0;
+    println!("After mut borrow: {}", price);
 }
 
-fn consume_symbol(s: String) {
-    println!("Function received: {}", s);
+fn print_symbol(s: &String) {
+    println!("Symbol: {}", s);
 }
 
-fn take_and_give_back(s: String) -> String {
-    println!("Borrow-and-returned: {}", s);
-    s
+fn add_shares(qty: &mut f64, delta: f64) {
+    *qty += delta;
 }
