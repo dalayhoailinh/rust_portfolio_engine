@@ -31,3 +31,32 @@ impl Position {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn total_cost_is_qty_times_avg() {
+        let p = Position::new("AAPL", 10.0, 100.0);
+        assert_eq!(p.total_cost(), 1000.0);
+    }
+
+    #[test]
+    fn pnl_is_positive_when_price_above_avg() {
+        let p = Position::new("AAPL", 10.0, 100.0);
+        assert_eq!(p.unrealized_pnl(110.0), 100.0);
+    }
+
+    #[test]
+    fn pnl_is_negative_when_price_below_avg() {
+        let p = Position::new("AAPL", 10.0, 100.0);
+        assert_eq!(p.unrealized_pnl(95.0), -50.0);
+    }
+
+    #[test]
+    fn pnl_percent_is_zero_when_avg_price_is_zero() {
+        let p = Position::new("X", 5.0, 0.0);
+        assert_eq!(p.unrealized_pnl_percent(100.0), 0.0);
+    }
+}
