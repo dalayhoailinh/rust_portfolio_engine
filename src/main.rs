@@ -1,21 +1,28 @@
 fn main() {
-    // immutable
-    let cash: f64 = 10_000.0;
-    println!("Starting cash: ${}", cash);
+    let a = String::from("AAPL");
+    let b = a;
 
-    // mutable
-    let mut realized_pnl: f64 = 0.0;
-    realized_pnl += 250.5;
-    realized_pnl -= 100.00;
-    println!("Realized PnL after 2 trades: ${}", realized_pnl);
+    // print!("{}", a);
+    println!("b owns: {}", b);
 
-    // type inference
-    let symbol = "AAPL";
-    let quantity = 10;
-    let avg_price = 150.0;
+    let x = 42;
+    let y = x;
+    println!("x: {}, y: {}", x, y);
 
-    // shadowing
-    let price_label = avg_price;
-    let price_label = format!("${}", price_label);
-    println!("{} x {} @ {}", symbol, quantity, price_label);
+    let symbol = String::from("GOOGL");
+    consume_symbol(symbol);
+    // println!("symbol: {}", symbol);
+
+    let s1 = String::from("MSFT");
+    let s1 = take_and_give_back(s1);
+    println!("Got back: {}", s1);
+}
+
+fn consume_symbol(s: String) {
+    println!("Function received: {}", s);
+}
+
+fn take_and_give_back(s: String) -> String {
+    println!("Borrow-and-returned: {}", s);
+    s
 }
