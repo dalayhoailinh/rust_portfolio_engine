@@ -1,33 +1,23 @@
 mod position;
 mod trading;
 
-use position::Position;
-use trading::{TradingError, buy, withdraw};
+use std::time::Duration;
+use tokio::time::sleep;
 
-fn main() {
-    let cash = 10_000.0;
+#[tokio::main]
+async fn main() {
+    println!("Q2 Week 2 - async engine starting");
 
-    match buy(cash, None, "AAPL", 10.0, 100.0) {
-        Ok((pos, new_cash)) => {
-            println!("Bought: {:?}", pos);
-            println!("Cash left: ${}", new_cash);
-        }
-        Err(e) => println!("Buy failed: {:?}", e),
-    }
+    let price = fetch_fake_price("AAPL").await;
+    println!("Fetched price for AAPL = ${}", price);
 
-    match buy(cash, None, "TSLA", 100.0, 250.0) {
-        Ok((pos, new_cash)) => {
-            println!("Bought: {:?}, cash {}", pos, new_cash)
-        }
-        Err(TradingError::InsufficientCash { needed, have }) => {
-            println!("Need ${}, have ${}", needed, have);
-        }
-        Err(e) => println!("Other error: {:?}", e),
-    }
+    println!("Q2 Week 2 - done");
+}
 
-    let pos = Position::new("AAPL", 10.0, 100.00);
-    match withdraw(&pos, 50.0, 120.0) {
-        Ok(cash) => println!("Got ${} cash", cash),
-        Err(e) => println!("Withdraw failed: {:?}", e),
+async fn fetch_fake_price(symbol: &str) -> f64 {
+    sleep(Duration::from_millis(200)).await;
+    match symbol {
+        "AAPL" => 187.45,
+        _ => 0.0,
     }
 }
