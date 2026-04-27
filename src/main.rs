@@ -1,4 +1,5 @@
 mod indicators;
+mod market_data;
 mod position;
 mod trading;
 
