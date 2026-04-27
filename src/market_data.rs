@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -8,6 +9,21 @@ pub struct OhlcvBar {
     pub low: f64,
     pub close: f64,
     pub volume: u64,
+}
+
+pub async fn load_ohlcv_csv(path: &str) -> Result<Vec<OhlcvBar>> {
+    let body = tokio::fs::read_to_string(path)
+        .await
+        .with_context(|| format!("failed to read CSV at {path}"))?;
+
+    let mut reader = csv::Reader::from_reader(body.as_bytes());
+
+    let bars: Vec<OhlcvBar> = reader
+        .deserialize()
+        .collect::<Result<_, _>>()
+        .with_context(|| format!("failed to parse CSV at {path}"))?;
+
+    Ok(bars)
 }
 
 #[cfg(test)]
