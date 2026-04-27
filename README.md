@@ -8,23 +8,21 @@ in Q2 Week 4 via `flutter_rust_bridge`.
 - `Position` struct mirroring the Dart entity (symbol, quantity, avg buy price).
 - P&L, market value and percentage helpers.
 - `buy` / `withdraw` returning `Result<_, TradingError>`.
-- Unit tests for every math path.
+- **Async I/O via Tokio**: `load_ohlcv_csv` reads OHLCV bars off disk without blocking.
+- **`OhlcvBar` + serde**: zero-boilerplate JSON / CSV parsing — same shape EODHD returns in Q2 Week 5.
+- **Indicators**: O(n) Simple Moving Average, ready to draw on top of the Q1 candlestick chart.
+- **Concurrent multi-symbol loader** with `tokio::try_join!` — measurable speedup over sequential.
+- 11 unit tests covering math, JSON roundtrip, parity with the Dart side.
 
 ## Run
-
 ```bash
-cargo run
-cargo test
+cargo run                # demo: load 3 CSVs, compute SMA(20), print signals
+cargo run --release      # release build for honest timing comparison
+cargo test               # all 11 tests must be green
 ```
 
-## Why Rust here?
-Q1 closed with a Flutter app where all P&L math lives in Dart. Q2 moves that
-math into a Rust crate — same logic, same numbers, different runtime path.
-The win shows up in Q3 when the engine has to compute RSI / MACD / Bollinger
-Bands at thousands of ticks per second without blocking the Flutter UI thread.
-
 ## Roadmap link
-- ✅ Week 1 — ownership, borrowing, struct, enum, Result, Option (this repo)
-- ⏳ Week 2 — async with Tokio + JSON parsing with serde
-- ⏳ Week 3 — `flutter_rust_bridge` integration
+- ✅ Week 1 — ownership, borrowing, struct, enum, Result, Option
+- ✅ Week 2 — async with Tokio + JSON parsing with serde + CSV + SMA (this commit)
+- ⏳ Week 3 — `flutter_rust_bridge` integration: call this engine from Dart
 - ⏳ Week 4 — replace Dart math in `portfolio_tracker` with Rust calls + benchmark
