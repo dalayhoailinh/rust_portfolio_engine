@@ -1,24 +1,31 @@
 fn main() {
-    let cash: f64 = 10_000.0;
-    println!("Starting cash: ${}", cash);
+    // move
+    let a = String::from("AAPL");
+    let b = a;
+    // println!("{}", a); // Error
+    println!("b owns: {}", b);
 
-    // cash = 5_000.0; // FAIL
+    // copy
+    let x = 42;
+    let y = x; // i32 is 'Copy', valid
+    println!("x = {}, y = {}", x, y);
 
-    // Using mut
-    let mut realized_pnl: f64 = 0.0;
-    realized_pnl += 250.0;
-    realized_pnl -= 100.0;
-    println!("Realized PnL after 2 trades: ${}", realized_pnl);
+    // move into a function
+    let symbol = String::from("GOOGL");
+    consume_symbol(symbol); // symbol moved into the functioni
+    // println!("{}", symbol); // Error
 
-    // type inference
-    let symbol = "AAPL";
-    let quantity = 10;
-    let avg_price = 187.45;
+    // return ownership back
+    let s1 = String::from("MSFT");
+    let s1 = take_and_gice_back(s1);
+    println!("Got back: {}", s1);
+}
 
-    // shadowing
-    let price_label = avg_price;
-    let price_label = format!("${}", price_label);
-    // same name, new type, OK
+fn take_and_gice_back(s: String) -> String {
+    println!("Borrowed and returned: {}", s);
+    s
+}
 
-    println!("{} x {} @ {}", symbol, quantity, price_label);
+fn consume_symbol(s: String) {
+    println!("Function received: {}", s);
 }
