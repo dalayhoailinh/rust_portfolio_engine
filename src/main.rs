@@ -1,12 +1,31 @@
 mod position;
+mod trading;
+use crate::trading::{buy, withdraw};
 use position::Position;
 
 fn main() {
-    let aapl = Position::new("AAPL", 10.0, 100.0);
+    let cash = 10_000.0;
 
-    println!("Position: {:?}", aapl);
-    println!("Total cost: ${}", aapl.total_cost());
-    println!("Market value @120: ${}", aapl.market_value(120.0));
-    println!("PnL @120: ${}", aapl.unrealized_pnl(120.0));
-    println!("PnL% @120: {}%", aapl.unrealized_pnl_percent(120.0));
+    // match: try-catch
+    match buy(cash, None, "AAPL", 10.0, 100.0) {
+        Ok((pos, new_cash)) => {
+            println!("Bought: {:?}", pos);
+            println!("Cash left: {}", new_cash);
+        }
+        Err(e) => println!("Buy failed: {:?}", e),
+    }
+
+    match buy(cash, None, "TLSA", 100.0, 250.0) {
+        Ok((pos, new_cash)) => {
+            println!("Bought: {:?}", pos);
+            println!("Cash left: {}", new_cash);
+        }
+        Err(e) => println!("Buy failed: {:?}", e),
+    }
+
+    let pos = Position::new("AAPL", 10.0, 100.0);
+    match withdraw(&pos, 50.0, 120.0) {
+        Ok(cash) => println!("Got ${} cash", cash),
+        Err(e) => println!("Withdraw failed: {:?}", e),
+    }
 }
