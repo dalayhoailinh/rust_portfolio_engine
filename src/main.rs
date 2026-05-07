@@ -1,31 +1,32 @@
 fn main() {
-    // move
-    let a = String::from("AAPL");
-    let b = a;
-    // println!("{}", a); // Error
-    println!("b owns: {}", b);
+    // imutable borrow
+    let symbol = String::from("APPL");
+    print_symbol(&symbol);
+    print_symbol(&symbol); // lend many times
+    println!("Still own it: {}", symbol);
 
-    // copy
-    let x = 42;
-    let y = x; // i32 is 'Copy', valid
-    println!("x = {}, y = {}", x, y);
+    // mutable borrow
+    let mut quantity = 10.0;
+    add_shares(&mut quantity, 5.0);
+    add_shares(&mut quantity, 2.5);
+    println!("Final quantity: {}", quantity);
 
-    // move into a function
-    let symbol = String::from("GOOGL");
-    consume_symbol(symbol); // symbol moved into the functioni
-    // println!("{}", symbol); // Error
+    // borrow checker rule
+    let mut price = 100.0;
+    let r1 = &price;
+    let r2 = &price;
+    // let r3 = &mut price; // Error
+    println!("Two readers: {} {}", r1, r2); // borrows end
 
-    // return ownership back
-    let s1 = String::from("MSFT");
-    let s1 = take_and_gice_back(s1);
-    println!("Got back: {}", s1);
+    let r3 = &mut price;
+    *r3 += 5.0;
+    println!("After mut borrow: {}", price);
 }
 
-fn take_and_gice_back(s: String) -> String {
-    println!("Borrowed and returned: {}", s);
-    s
+fn add_shares(qty: &mut f64, delta: f64) {
+    *qty += delta;
 }
 
-fn consume_symbol(s: String) {
-    println!("Function received: {}", s);
+fn print_symbol(s: &String) {
+    println!("Symbol = {}", s);
 }
