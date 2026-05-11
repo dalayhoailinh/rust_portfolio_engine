@@ -1,31 +1,23 @@
 mod position;
 mod trading;
-use crate::trading::{buy, withdraw};
-use position::Position;
 
-fn main() {
-    let cash = 10_000.0;
+use std::time::Duration;
+use tokio::time::sleep;
 
-    // match: try-catch
-    match buy(cash, None, "AAPL", 10.0, 100.0) {
-        Ok((pos, new_cash)) => {
-            println!("Bought: {:?}", pos);
-            println!("Cash left: {}", new_cash);
-        }
-        Err(e) => println!("Buy failed: {:?}", e),
-    }
+#[tokio::main]
+async fn main() {
+    println!("Q2 Week 2 - async engine starting");
 
-    match buy(cash, None, "TLSA", 100.0, 250.0) {
-        Ok((pos, new_cash)) => {
-            println!("Bought: {:?}", pos);
-            println!("Cash left: {}", new_cash);
-        }
-        Err(e) => println!("Buy failed: {:?}", e),
-    }
+    let price = fetch_fake_price("AAPL").await;
+    println!("Fake price for AAPL = ${}", price);
 
-    let pos = Position::new("AAPL", 10.0, 100.0);
-    match withdraw(&pos, 50.0, 120.0) {
-        Ok(cash) => println!("Got ${} cash", cash),
-        Err(e) => println!("Withdraw failed: {:?}", e),
+    println!("Q2 Week 2 - done");
+}
+
+async fn fetch_fake_price(symbol: &str) -> f64 {
+    sleep(Duration::from_millis(200)).await;
+    match symbol {
+        "AAPL" => 187.45,
+        _ => 0.0,
     }
 }
