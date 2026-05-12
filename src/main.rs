@@ -1,4 +1,5 @@
 mod indicators;
+mod market_data;
 
 #[tokio::main]
 async fn main() {
