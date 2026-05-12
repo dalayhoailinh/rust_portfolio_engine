@@ -3,7 +3,8 @@
 // - Deserialize: convert from formats like JSON back into our structs
 use serde::{Deserialize, Serialize};
 
-// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)] auto-generates traits for our struct:
+// #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)] auto-generates
+// traits for our struct:
 // - Debug: lets us print with {:?}
 // - Clone: lets us call .clone() to make a deep copy
 // - Serialize: lets us convert our struct into formats like JSON
@@ -58,4 +59,27 @@ mod tests {
         assert_eq!(bar.date, "2026-04-15");
         assert_eq!(bar.volume, 42_531_900);
     }
+}
+
+// anyhow: error handling library for Rust
+// - Context: lets us add extra info to errors as they propagate up the call
+//   stack
+// - Result: a type alias for std::result::Result<T, anyhow::Error>, which is
+//   a common way to represent a function that can either return a value of
+//   type T or an error
+use anyhow::{Context, Ok, Result};
+
+pub async fn load_ohlcv_csv(path: &str) -> Result<Vec<OhlcvBar>> {
+    let body = tokio::fs::read_to_string(path)
+        .await
+        .with_context(|| format!("failed to read CSV at {path}"))?;
+
+    let mut reader = csv::Reader::from_reader(body.as_bytes());
+
+    let bars: Vec<OhlcvBar> = reader
+        .deserialize()
+        .collect::<Result<_, _>>()
+        .with_context(|| format!("failed to parse CSV at {path}"))?;
+
+    Ok(bars)
 }
