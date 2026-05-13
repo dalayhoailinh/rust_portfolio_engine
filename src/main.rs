@@ -2,32 +2,51 @@ mod indicators;
 mod market_data;
 
 use anyhow::Result;
+use std::time::Instant;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Q2 Week 2 - async engine starting");
 
-    let aapl = market_data::load_ohlcv_csv("data/aapl_30d.csv").await?;
-    println!("Loaded {} AAPL bars", aapl.len());
+    // Sequential baseline
+    let t0 = Instant::now();
+    let _ = market_data::load_ohlcv_csv("data/aapl_30d.csv").await?;
+    let _ = market_data::load_ohlcv_csv("data/msft_30d.csv").await?;
+    let _ = market_data::load_ohlcv_csv("data/googl_30d.csv").await?;
+    let seq_ms = t0.elapsed().as_micros() as f64 / 1000.0;
+    println!("Sequential  : {:>6.2} ms", seq_ms);
 
-    let closes: Vec<f64> = aapl.iter().map(|b| b.close).collect();
+    // Concurrent with try_join!
+    let t1 = Instant::now();
+    let (aapl, msft, googl) = tokio::try_join!(
+        market_data::load_ohlcv_csv("data/aapl_30d.csv"),
+        market_data::load_ohlcv_csv("data/msft_30d.csv"),
+        market_data::load_ohlcv_csv("data/googl_30d.csv"),
+    )?;
+    let par_ms = t1.elapsed().as_micros() as f64 / 1000.0;
+    println!("Concurrent  : {:>6.2} ms", par_ms);
+    println!(
+        "AAPL bars: {}, MSFT bars: {}. GOOGL bars: {}",
+        aapl.len(),
+        msft.len(),
+        googl.len()
+    );
 
-    let sma_5 = indicators::simple_moving_average(&closes, 5);
-    let sma_20 = indicators::simple_moving_average(&closes, 20);
+    // Compute SMA(20) on each
+    for (sym, bars) in
+        [("AAPL", &aapl), ("MSFT", &msft), ("GOOGL", &googl)]
+    {
+        let closes: Vec<f64> = bars.iter().map(|b| b.close).collect();
+        let sma = indicators::simple_moving_average(&closes, 20);
 
-    println!("\n  date         close   sma5    sma20");
-    println!("  ----------   -----   -----   -----");
-    for i in 0..aapl.len() {
-        let s5 = sma_5[i]
-            .map(|x| format!("{:>6.2}", x))
-            .unwrap_or("  --  ".into());
-        let s20 = sma_20[i]
-            .map(|x| format!("{:>6.2}", x))
-            .unwrap_or("  --  ".into());
+        let last_sma = sma.last().and_then(|x| *x).unwrap_or(f64::NAN);
+        let last_close = bars.last().map(|b| b.close).unwrap_or(0.0);
+        let signal =
+            if last_close > last_sma { "BULL ▲" } else { "BEAR ▼" };
         println!(
-            "  {}   {:>6.2}  {}  {}",
-            aapl[i].date, aapl[i].close, s5, s20
-        );
+            "  {sym:<5} close = {:>7.2}  SMA20 = {:>7.2}  {signal}",
+            last_close, last_sma
+        )
     }
 
     println!("Q2 Week 2 - done");
