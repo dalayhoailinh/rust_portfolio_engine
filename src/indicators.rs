@@ -68,4 +68,27 @@ mod tests {
         let out = simple_moving_average(&prices, 5);
         assert_eq!(out, vec![None, None]);
     }
+
+    #[test]
+    fn sma_parity_reference_values() {
+        let closes = [
+            170.80, 171.95, 172.50, 173.00, 173.60, // first 5
+            174.80, 175.40, 176.10, 176.85, 177.55, // next 5
+        ];
+        let out = simple_moving_average(&closes, 5);
+
+        for v in &out[..4] {
+            assert_eq!(*v, None);
+        }
+        // bar 4 → mean(170.80..=173.60)
+        assert_close(
+            out[4].unwrap(),
+            (170.80 + 171.95 + 172.50 + 173.00 + 173.60) / 5.0,
+        );
+        // bar 9 → mean(174.80..=177.55)
+        assert_close(
+            out[9].unwrap(),
+            (174.80 + 175.40 + 176.10 + 176.85 + 177.55) / 5.0,
+        );
+    }
 }
